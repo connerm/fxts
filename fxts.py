@@ -78,7 +78,7 @@ class Bar():
         self.low = low
         self.close = close
     def __str__(self):
-        return "%f %f %f %f" % (self.open_, self.high, self.low, self.close)
+        return "%s %f %f %f %f" % (self.datetime_, self.open_, self.high, self.low, self.close)
         
     
 def main():
@@ -141,23 +141,23 @@ def execute(bar, account, signals):
 
         #open
         if signal.order_type == OPEN:
+            print bar
             pos = Position()
             account.positions.append(pos)
             units = account.risk()
             pos.open_pos(signal.pair , bar.close, signal.direction, units)
-            signals.remove(signal)
             
         #close
         if signal.order_type == CLOSE:
             for pos in account.positions:
                 if signal.pair == pos.pair and signal.direction == pos.direction:
+                    print bar
                     pos.close_pos(bar.close)
                     account.settle(pos)
                     account.positions.remove(pos)
-                    signals.remove(signal)
                     print account
         
-    return signals
+    return []
 
 if __name__ == '__main__':
     main()
