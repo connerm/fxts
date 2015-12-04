@@ -8,7 +8,8 @@ class Position:
     def __init__(self):
         self.state = None
 
-    def open_pos(self, open_price, direction, units):
+    def open_pos(self, symbol, open_price, direction, units):
+        self.symbol = symbol
         self.open_price = open_price
 	self.direction = direction
         self.units = units
@@ -28,7 +29,6 @@ class Position:
 
 class Account():
     positions = []
-    signals = []
 
     def __init__(self, balance, risk_percent):
         self.balance = balance
