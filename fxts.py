@@ -6,28 +6,6 @@ SHORT = 'short'
 OPEN = 'open'
 CLOSE = 'close'
 
-class Position: 
-    def __init__(self):
-        self.state = None
-
-    def open_pos(self, pair, open_price, direction, units):
-        self.pair = pair
-        self.open_price = open_price
-	self.direction = direction
-        self.units = units
-	self.state = OPEN
-        print "OPEN: Direction: %s Price: %f Units: %f" % (self.direction, self.open_price, self.units)
-
-    def close_pos(self, close_price):
-	self.close_price = close_price
-	if self.direction == LONG:
-           self.pips = self.close_price - self.open_price
-        if self.direction == SHORT:
-           self.pips =  self.open_price - self.close_price
-        self.profit = self.pips*self.units
-        self.state = CLOSE
-        print "CLOSE: Direction: %s Price: %f Pips: %f Profit: %f" % (self.direction, self.close_price, self.pips, self.profit)
-
 class Account():
     positions = []
 
@@ -47,29 +25,47 @@ class Account():
     def __str__(self):
         return "Account balance: %s" % (self.balance)
 
-class Signal():
-    def __init__(self, pair, order_type, direction):
+class Position: 
+    def __init__(self, pair, datetime, direction, units, open_price):
         self.pair = pair
+        self.datetime = datetime
+	self.direction = direction
+        self.units = units
+        self.open_price = open_price
+        print "OPEN: Direction: %s Price: %f Units: %f" % (self.direction, self.open_price, self.units)
+
+    def close(self, datetime, close_price):
+        self.datetime = datetime
+	self.close_price = close_price
+	if self.direction == LONG:
+           self.pips = self.close_price - self.open_price
+        if self.direction == SHORT:
+           self.pips =  self.open_price - self.close_price
+        self.profit = self.pips*self.units
+        print "CLOSE: Direction: %s Price: %f Pips: %f Profit: %f" % (self.direction, self.close_price, self.pips, self.profit)
+
+class Signal():
+    def __init__(self, pair, datetime, order_type, direction):
+        self.pair = pair
+        self.datetime = datetime
         self.order_type = order_type
         self.direction = direction
     def __str__(self):
         return "Signal: %s %s %s" % (self.order_type, self.direction, self.pair)
 
-'''
 class Order()
-    def __init__(self, signal):
-        self.signal
-'''
+    def __init__(self, datetime, signal, price, account):
+        self.pair = signal.pair
+        self.datetime = datetime
+        self.order_type = signal.order_type
+        self.price = price
+        self.direction = signal.direction
+        self.units = account.risk()
 
-class Data():
-    def __init__(self, length):
-        self.data = []
-        self.length = length
-    def add(self, bar): 
-        self.data.append(bar)
-        if len(self.data) > self.length:
-            self.data.pop(0)
-
+    def execute(self):
+        #exectue Order
+        #return pos
+        
 class Bar():
     def __init__(self, datetime_, open_, high, low, close):
         self.datetime_ = datetime_
@@ -80,11 +76,26 @@ class Bar():
     def __str__(self):
         return "%s %f %f %f %f" % (self.datetime_, self.open_, self.high, self.low, self.close)
         
-    
+class Tick()
+    def __init__(self, datetime, bid, ask):
+        self.datetime = datetime
+        self.bid = bid
+        self.ask = ask
+
+class Data():
+    def __init__(self, length):
+        self.data = []
+        self.length = length
+    def add(self, bar): 
+        self.data.append(bar)
+        if len(self.data) > self.length:
+            self.data.pop(0)
+
 def main():
     feed = Data(100)
     account = Account(1000,0.02)
     signals = []
+    orders = []
 
     with open(sys.argv[1]) as f:
         
@@ -138,25 +149,8 @@ def strategy(bar, account, signals):
 def execute(bar, account, signals):
 
     for signal in signals:
-
-        #open
-        if signal.order_type == OPEN:
-            print bar
-            pos = Position()
-            account.positions.append(pos)
-            units = account.risk()
-            pos.open_pos(signal.pair , bar.close, signal.direction, units)
-            
-        #close
-        if signal.order_type == CLOSE:
-            for pos in account.positions:
-                if signal.pair == pos.pair and signal.direction == pos.direction:
-                    print bar
-                    pos.close_pos(bar.close)
-                    account.settle(pos)
-                    account.positions.remove(pos)
-                    print account
-        
+        #make order
+        order = Order( datetime, signal, price, account)
     return []
 
 if __name__ == '__main__':
