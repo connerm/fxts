@@ -12,7 +12,7 @@ OPEN = 'OPEN'
 CLOSE = 'CLOSE'
     
 def main():
-    feed = Data(100)
+    feed = Data(60*30)
     account = Account(1000,0.02)
     signals = []
 
@@ -20,23 +20,23 @@ def main():
         
         #price loop    
         for line in f:
-            line = line.split(",")
-            date = datetime.strptime(line[0], "%Y%m%d %H%M%S%f")
+            line = line.split(";")
+            date = datetime.strptime(line[0], "%Y%m%d %H%M%S")
             line = [float(x) for x in line[1:]]
 
             #get tick
-            tick = Tick('EURUSD', date, line[0],line[1])
+            tick = Tick('EURUSD', date, line[3],line[3])
 
             #update data 
-            feed.add(Tick)
+            feed.add(tick.bid)
 
             #execute
             signals = execute(tick, account, signals)
             
             #strategy
-            signals = generate_signals(tick, account, signals)
+            signals = generate_signals(tick, account, feed, signals)
             
-def generate_signals(tick, account, signals):
+def generate_signals(tick, account, feed, signals):
     
     #entery
     if account.positions == []:

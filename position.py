@@ -9,13 +9,13 @@ class Position:
         self.open_time = datetime
         self.open_bid = bid
         self.open_ask = ask
-        print "OPEN@", datetime, self.direction
+        print "OPEN@", datetime, self.direction, bid
 
     def close(self, datetime, bid, ask):
         self.close_time = datetime
         self.close_bid = bid
         self.close_ask = ask
-        print "CLOSE@", datetime, self.direction
+        print "CLOSE@", datetime, self.direction, bid
 
     def calculate_profit(self):
         if self.direction == 'LONG':
